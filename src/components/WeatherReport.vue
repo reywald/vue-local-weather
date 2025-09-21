@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { type Reactive, reactive, onMounted } from "vue";
+import { type Ref, ref, onMounted } from "vue";
+import WindDirection from "./WindDirection.vue";
 
 type WeatherData = {
   location?: {
@@ -31,7 +32,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-let data: Reactive<WeatherData | undefined> = reactive({});
+let data: Ref<WeatherData | undefined> = ref({});
 
 const fetchWeather = async (coords: Coords): Promise<WeatherData> => {
   const { latitude, longitude } = coords;
@@ -46,16 +47,44 @@ const fetchWeather = async (coords: Coords): Promise<WeatherData> => {
   return data;
 };
 
+const formatDate = (dateString: Date): string => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("default", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(date);
+};
+
 onMounted(async () => {
   const { latitude, longitude } = props.coords;
   const weatherResponse = await fetchWeather({ latitude, longitude });
-  data = weatherResponse;
+  data.value = weatherResponse;
 });
 </script>
 
 <template>
   <div>
-    <article v-if="data && data.current">{{ data.current }}</article>
+    <article
+      v-if="data && data.current"
+      class="max-w-md w-96 rounded-lg shadow-lg p-4 flex bg-white text-black"
+    >
+      <div class="basis-1/4 text-left">
+        <img :src="data.current.condition.icon" alt="" class="h-16 w-16" />
+      </div>
+      <div class="basis-3/4 text-left">
+        <h1 class="text-3xl font-bold">
+          {{ data.current.condition.text }}
+          <span class="text-2xl block"> {{ data.current.temp_c }}&#8451; </span>
+        </h1>
+        <p>{{ data.location?.name }} {{ data.location?.region }}</p>
+        <p>Precipitation: {{ data.current.precip_mm }}mm</p>
+        <p v-if="data.location?.localtime">{{ formatDate(data.location?.localtime) }}</p>
+        <p>
+          Wind: {{ data.current.wind_kph }} kph
+          <wind-direction :degrees="data.current.wind_degree" />
+        </p>
+      </div>
+    </article>
     <div v-else>Loading...</div>
   </div>
 </template>

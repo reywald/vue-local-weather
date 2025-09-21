@@ -10,14 +10,20 @@ let coords: Reactive<Geolocation | undefined> = reactive({});
 const geolocationBlockedByUser: Ref<boolean> = ref(false);
 
 const getGeolocation = async (): Promise<void> => {
-  await navigator.geolocation.getCurrentPosition(
-    async (position: { coords: Geolocation }) => {
+  navigator.geolocation.getCurrentPosition(
+    () => { },
+    () => { },
+    {}
+  );
+  navigator.geolocation.getCurrentPosition(
+    async (position: { coords: Geolocation; }) => {
       coords = position.coords;
     },
-    (error: { message: string }) => {
+    (error: { message: string; }) => {
       geolocationBlockedByUser.value = true;
       console.error(error.message);
-    }
+    },
+    { maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }
   );
 };
 

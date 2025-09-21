@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import GetLocation from "./components/GetLocation.vue";
+// import GetLocation from "./components/GetLocation.vue";
+import GetGeoLocation from "./components/GetGeoLocation.vue";
 </script>
 
 <template>
-  <GetLocation />
+  <!-- <GetLocation /> -->
+  <GetGeoLocation />
 </template>
-
-<style scoped></style>
